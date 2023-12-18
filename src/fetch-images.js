@@ -10,7 +10,7 @@ export default class ImageApi {
   }
 
   async fetchImages() {
-    const KEY = '41336061-ccc3d5cdbb0cd5c3c85863297'; 
+    const KEY = '441336061-ccc3d5cdbb0cd5c3c85863297'; 
     const response = await axios.get(
       `https://pixabay.com/api/?key=${KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${this.page}`
     );
