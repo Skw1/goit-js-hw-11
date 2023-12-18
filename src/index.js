@@ -1,4 +1,4 @@
-import './styles.css';
+import '../styles.css';
 
 import ImageApi from './fetch-images';
 import Notiflix from 'notiflix';
