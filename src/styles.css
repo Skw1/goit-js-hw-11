@@ -73,11 +73,6 @@ body {
     border-radius: 8px;
   }
   
-  .load-more:hover,
-  .load-more:focus {
-    background-color: #555;
-  }
-  
   .is-hidden {
     display: none;
   }
