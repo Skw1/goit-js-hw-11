@@ -1,67 +1,71 @@
 import './styles.css';
 import ImageApi from './fetch-images';
-import Notiflix from 'notiflix';
+import { showNotification, showLoadButton, hideLoadButton } from './dom-helpers';
 import SimpleLightbox from 'simplelightbox';
 
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadBtn = document.querySelector('.load-more');
-const imageApi = new ImageApi();
+const imgApi = new ImageApi();
 
-searchForm.addEventListener('submit', search);
+searchForm.addEventListener('submit', handleSearch);
 loadBtn.addEventListener('click', onLoadMore);
 loadBtn.classList.add('is-hidden');
 
-async function search(event) {
+async function handleSearch(event) {
   event.preventDefault();
   const query = event.currentTarget.elements.searchQuery.value;
 
   if (!query) return;
 
   try {
-    imageApi.query = query;
-    imageApi.resetPage();
-    imageApi.resethitsCounter();
+    imgApi.query = query;
+    imgApi.resetPage();
+    imgApi.resethitsCounter();
 
-    const imgResponse = await imageApi.fetchImages();
+    const imgResponse = await imgApi.fetchImages();
 
     if (imgResponse.totalHits === 0) {
-      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-      loadBtn.classList.add('is-hidden');
+      showNotification('failure', 'Sorry, there are no images matching your search query. Please try again.');
+      hideLoadButton(loadBtn);
     } else {
-      Notiflix.Notify.success(`We found ${imgResponse.totalHits} images!`);
-      loadBtn.classList.remove('is-hidden');
-      createImageCard(imgResponse.hits);
+      showNotification('success', `We found ${imgResponse.totalHits} images!`);
+      showLoadButton(loadBtn);
+      createImageCards(imgResponse.hits);
     }
 
-    if (imageApi.viewedHits === imageApi.totalHits && imgResponse.totalHits !== 0) {
-      Notiflix.Notify.info("You've reached the end of search results.");
-      loadBtn.classList.add('is-hidden');
+    if (imgApi.viewedHits === imgApi.totalHits && imgResponse.totalHits !== 0) {
+      showNotification('info', "You've reached the end of search results.");
+      hideLoadButton(loadBtn);
     }
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
   }
 }
 
 async function onLoadMore() {
   try {
-    const imgResponse = await imageApi.fetchImages();
+    const imgResponse = await imgApi.fetchImages();
 
-    if (imageApi.viewedHits === imageApi.totalHits) {
-      Notiflix.Notify.info("You've reached the end of search results.");
-      loadBtn.classList.add('is-hidden');
+    if (imgApi.viewedHits === imgApi.totalHits) {
+      showNotification('info', "You've reached the end of search results.");
+      hideLoadButton(loadBtn);
     }
 
-    createImageCard(imgResponse.hits);
+    createImageCards(imgResponse.hits);
     autoScroll();
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
   }
 }
 
-function createImageCard(imageCard) {
-  const markupList = imageCard.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
-    <div class="photo-card">
+function createImageCards(imageCards) {
+  const fragment = document.createDocumentFragment();
+
+  imageCards.forEach(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
+    const card = document.createElement('div');
+    card.classList.add('photo-card');
+    card.innerHTML = `
       <a href="${largeImageURL}">
         <img src="${webformatURL}" alt="${tags}" loading="lazy" />
       </a>
@@ -71,9 +75,11 @@ function createImageCard(imageCard) {
         <p class="info-item"><b>Comments: <span>${comments}</span></b></p>
         <p class="info-item"><b>Downloads: <span>${downloads}</span></b></p>
       </div>
-    </div>`).join('');
+    `;
+    fragment.appendChild(card);
+  });
 
-  gallery.insertAdjacentHTML('beforeend', markupList);
+  gallery.appendChild(fragment);
   new SimpleLightbox('.gallery a');
 }
 
