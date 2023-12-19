@@ -23,6 +23,8 @@ async function handleSearch(event) {
     imgApi.resetPage();
     imgApi.resethitsCounter();
 
+    gallery.innerHTML = '';
+    
     const imgResponse = await imgApi.fetchImages();
 
     if (imgResponse.totalHits === 0) {
@@ -82,6 +84,8 @@ function createImageCards(imageCards) {
   gallery.appendChild(fragment);
   new SimpleLightbox('.gallery a');
 }
+
+
 
 function autoScroll() {
   const { height: cardHeight } = document.querySelector('.gallery').firstElementChild.getBoundingClientRect();
