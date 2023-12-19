@@ -5,42 +5,38 @@ import SimpleLightbox from 'simplelightbox';
 
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
-const loadMoreButton = document.querySelector('.load-more');
-
+const loadBtn = document.querySelector('.load-more');
 const imageApi = new ImageApi();
 
-searchForm.addEventListener('submit', onSearch);
-loadMoreButton.addEventListener('click', onLoadMore);
-loadMoreButton.classList.add('is-hidden');
+searchForm.addEventListener('submit', search);
+loadBtn.addEventListener('click', onLoadMore);
+loadBtn.classList.add('is-hidden');
 
-function showMessage(type, message) {
-  Notiflix.Notify[type](message);
-}
-
-async function onSearch(event) {
+async function search(event) {
   event.preventDefault();
+  const query = event.currentTarget.elements.searchQuery.value;
 
-  imageApi.query = event.currentTarget.elements.searchQuery.value;
-  imageApi.resetPage();
-  imageApi.resethitsCounter();
-
-  if (!imageApi.query) return;
+  if (!query) return;
 
   try {
+    imageApi.query = query;
+    imageApi.resetPage();
+    imageApi.resethitsCounter();
+
     const imgResponse = await imageApi.fetchImages();
 
     if (imgResponse.totalHits === 0) {
-      showMessage('failure', 'Sorry, there are no images matching your search query. Please try again.');
-      loadMoreButton.classList.add('is-hidden');
+      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+      loadBtn.classList.add('is-hidden');
     } else {
-      showMessage('success', `We found ${imgResponse.totalHits} images!`);
-      loadMoreButton.classList.remove('is-hidden');
+      Notiflix.Notify.success(`We found ${imgResponse.totalHits} images!`);
+      loadBtn.classList.remove('is-hidden');
       createImageCard(imgResponse.hits);
     }
 
     if (imageApi.viewedHits === imageApi.totalHits && imgResponse.totalHits !== 0) {
-      showMessage('info', "You've reached the end of search results.");
-      loadMoreButton.classList.add('is-hidden');
+      Notiflix.Notify.info("You've reached the end of search results.");
+      loadBtn.classList.add('is-hidden');
     }
   } catch (error) {
     console.log(error.message);
@@ -52,8 +48,8 @@ async function onLoadMore() {
     const imgResponse = await imageApi.fetchImages();
 
     if (imageApi.viewedHits === imageApi.totalHits) {
-      showMessage('info', "You've reached the end of search results.");
-      loadMoreButton.classList.add('is-hidden');
+      Notiflix.Notify.info("You've reached the end of search results.");
+      loadBtn.classList.add('is-hidden');
     }
 
     createImageCard(imgResponse.hits);
@@ -70,18 +66,10 @@ function createImageCard(imageCard) {
         <img src="${webformatURL}" alt="${tags}" loading="lazy" />
       </a>
       <div class="info">
-        <p class="info-item">
-          <b>Likes: <span>${likes}</span></b>
-        </p>
-        <p class="info-item">
-          <b>Views: <span>${views}</span></b>
-        </p>
-        <p class="info-item">
-          <b>Comments: <span>${comments}</span></b>
-        </p>
-        <p class="info-item">
-          <b>Downloads: <span>${downloads}</span></b>
-        </p>
+        <p class="info-item"><b>Likes: <span>${likes}</span></b></p>
+        <p class="info-item"><b>Views: <span>${views}</span></b></p>
+        <p class="info-item"><b>Comments: <span>${comments}</span></b></p>
+        <p class="info-item"><b>Downloads: <span>${downloads}</span></b></p>
       </div>
     </div>`).join('');
 

@@ -6,19 +6,24 @@ export default class ImageApi {
     this.page = 1;
     this.viewedHits = 0;
     this.totalHits = 0;
+    this.KEY = '41336061-ccc3d5cdbb0cd5c3c85863297';
   }
 
   async fetchImages() {
-    const KEY = '41214696-b8d5e81a3014509351e7b9ca6';
-    const response = await axios.get(
-      `https://pixabay.com/api/?key=${KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${this.page}`
-    );
+    try {
+      const response = await axios.get(
+        `https://pixabay.com/api/?key=${this.KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${this.page}`
+      );
 
-    this.incrementPage();
-    this.hitsCounter(response);
-    this.totalHits = response.data.totalHits;
+      this.incrementPage();
+      this.hitsCounter(response);
+      this.totalHits = response.data.totalHits;
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      throw error; 
+    }
   }
 
   incrementPage() {
